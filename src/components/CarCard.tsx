@@ -535,6 +535,9 @@ export default function CarCard(props: CarCardProps) {
               onAdd={props.onAddScenario}
               onDuplicate={props.onDuplicateScenario}
               onRemove={props.onRemoveScenario}
+              onRename={(id, label) =>
+                props.onUpdateScenario(id, "label", label)
+              }
             />
 
             <Show when={activeScenario()}>

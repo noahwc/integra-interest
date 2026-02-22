@@ -8,6 +8,7 @@ interface ScenarioTabsProps {
   onAdd: () => void;
   onDuplicate: (scenarioId: string) => void;
   onRemove: (scenarioId: string) => void;
+  onRename: (scenarioId: string, label: string) => void;
 }
 
 export default function ScenarioTabs(props: ScenarioTabsProps) {
@@ -29,7 +30,20 @@ export default function ScenarioTabs(props: ScenarioTabsProps) {
             }}
             onClick={() => props.onSelect(index())}
           >
-            {scenario.label}
+            <Show
+              when={index() === props.activeIndex}
+              fallback={scenario.label}
+            >
+              <input
+                type="text"
+                class="bg-transparent outline-none w-16 min-w-0"
+                value={scenario.label}
+                onInput={(e) =>
+                  props.onRename(scenario.id, e.currentTarget.value)
+                }
+                onClick={(e) => e.stopPropagation()}
+              />
+            </Show>
             <Show when={index() === props.activeIndex}>
               <span
                 class="ml-0.5 opacity-40 hover:opacity-100 text-xs cursor-pointer"

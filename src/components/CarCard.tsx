@@ -6,7 +6,7 @@ import type {
   FuelInputs,
   Settings,
 } from "../lib/types";
-import { calculateScenario, calculateLifetimeCost } from "../lib/calculations";
+import { calculateScenario, calculateLifetimeCost, optimizeDownPayment } from "../lib/calculations";
 import { getCombinedTaxRate } from "../lib/tax-data";
 import {
   formatCurrency,
@@ -99,6 +99,32 @@ export default function CarCard(props: CarCardProps) {
     props.car.overrides.includeFuel != null ||
     props.car.overrides.maxCarAge != null ||
     props.car.overrides.mileageCap != null;
+
+  const handleOptimize = () => {
+    const scenario = activeScenario();
+    if (!scenario) return;
+    const s = effectiveSettings();
+    const optimal = optimizeDownPayment(
+      props.car.price,
+      s.fees,
+      scenario,
+      getCombinedTaxRate(s.province),
+      props.car.otherFees,
+      props.car.fuelInputs,
+      s.annualKm,
+      s.maxCarAge,
+      s.mileageCap,
+      props.car.vehicleYear,
+      props.car.initialMileage,
+      s.includeFuel,
+      s.investmentReturn,
+      s.cashOnHand,
+    );
+    if (scenario.payInFull) {
+      props.onUpdateScenario(scenario.id, "payInFull", false);
+    }
+    props.onUpdateScenario(scenario.id, "downPayment", optimal);
+  };
 
   return (
     <div
@@ -519,6 +545,7 @@ export default function CarCard(props: CarCardProps) {
                     onUpdate={(field, value) =>
                       props.onUpdateScenario(scenario().id, field, value)
                     }
+                    onOptimize={handleOptimize}
                   />
                   <ScenarioSummary
                     car={props.car}

@@ -91,6 +91,65 @@ export function calculateScenario(
   };
 }
 
+export function optimizeDownPayment(
+  carPrice: number,
+  fees: DealershipFees,
+  scenario: FinancingScenario,
+  combinedTaxRate: number,
+  otherFees: number,
+  fuelInputs: FuelInputs,
+  annualKm: number,
+  maxCarAge: number,
+  mileageCap: number,
+  vehicleYear: number,
+  initialMileage: number,
+  includeFuel: boolean,
+  investmentReturn: number,
+  cashOnHand: number,
+): number {
+  const costForDown = (down: number): number => {
+    const trial: FinancingScenario = { ...scenario, downPayment: down, payInFull: false };
+    const result = calculateScenario(carPrice, fees, trial, combinedTaxRate, otherFees);
+    const lifetime = calculateLifetimeCost(
+      result, fuelInputs, annualKm, maxCarAge, mileageCap,
+      vehicleYear, initialMileage, includeFuel, investmentReturn,
+      trial.paymentFrequency, cashOnHand,
+    );
+    return lifetime.costPerYear;
+  };
+
+  const totalFees = fees.freightPdi + fees.airConditioningTax + fees.tireLevy + fees.dealerFee;
+  const maxDown = (carPrice + totalFees) * (1 + combinedTaxRate) + otherFees;
+
+  // Golden section search
+  const phi = (1 + Math.sqrt(5)) / 2;
+  const resphi = 2 - phi;
+  let a = 0;
+  let b = maxDown;
+  let x1 = a + resphi * (b - a);
+  let x2 = b - resphi * (b - a);
+  let f1 = costForDown(x1);
+  let f2 = costForDown(x2);
+
+  for (let i = 0; i < 50; i++) {
+    if (f1 < f2) {
+      b = x2;
+      x2 = x1;
+      f2 = f1;
+      x1 = a + resphi * (b - a);
+      f1 = costForDown(x1);
+    } else {
+      a = x1;
+      x1 = x2;
+      f1 = f2;
+      x2 = b - resphi * (b - a);
+      f2 = costForDown(x2);
+    }
+  }
+
+  return Math.round((a + b) / 2);
+}
+
 export function calculateLifetimeCost(
   financingResult: CalculationResult,
   fuelInputs: FuelInputs,

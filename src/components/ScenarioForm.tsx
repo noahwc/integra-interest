@@ -1,4 +1,4 @@
-import { For } from "solid-js";
+import { For, Show } from "solid-js";
 import type { FinancingScenario, PaymentFrequency } from "../lib/types";
 import { FREQUENCY_LABELS, parseNumericInput } from "../lib/format";
 
@@ -8,6 +8,7 @@ interface ScenarioFormProps {
     field: K,
     value: FinancingScenario[K],
   ) => void;
+  onOptimize?: () => void;
 }
 
 export default function ScenarioForm(props: ScenarioFormProps) {
@@ -60,7 +61,18 @@ export default function ScenarioForm(props: ScenarioFormProps) {
 
       <div class="form-control">
         <label class="label py-1 flex items-center justify-between">
-          <span class="label-text text-xs uppercase tracking-wider opacity-70">Down Payment</span>
+          <span class="flex items-center gap-2">
+            <span class="label-text text-xs uppercase tracking-wider opacity-70">Down Payment</span>
+            <Show when={props.onOptimize}>
+              <button
+                class="btn btn-ghost btn-xs text-xs opacity-50 hover:opacity-100"
+                onClick={() => props.onOptimize?.()}
+                title="Optimize down payment for lowest cost/year"
+              >
+                Optimize
+              </button>
+            </Show>
+          </span>
           <label class="flex items-center gap-1.5 cursor-pointer">
             <input
               type="checkbox"

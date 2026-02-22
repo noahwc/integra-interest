@@ -29,6 +29,9 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
       props.car.vehicleYear,
       props.car.initialMileage,
       props.settings.includeFuel,
+      props.settings.investmentReturn,
+      props.scenario.paymentFrequency,
+      props.settings.cashOnHand,
     );
 
   const lifetimeLow = () =>
@@ -41,6 +44,9 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
       props.car.vehicleYear,
       props.car.initialMileage,
       props.settings.includeFuel,
+      props.settings.investmentReturn,
+      props.scenario.paymentFrequency,
+      props.settings.cashOnHand,
     );
 
   const lifetimeHigh = () =>
@@ -53,9 +59,15 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
       props.car.vehicleYear,
       props.car.initialMileage,
       props.settings.includeFuel,
+      props.settings.investmentReturn,
+      props.scenario.paymentFrequency,
+      props.settings.cashOnHand,
     );
 
   const showRange = () => props.settings.annualKm > 0;
+
+  const hasInvestment = () =>
+    props.settings.investmentReturn > 0 && props.settings.cashOnHand > 0 && result().amountFinanced > 0;
 
   return (
     <div class="mt-4">
@@ -89,6 +101,26 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
           </div>
           <div class="stat-desc">Out-of-pocket cash</div>
         </div>
+        {hasInvestment() && (
+          <div class="stat py-3 px-4">
+            <div class="stat-title text-xs uppercase tracking-wider opacity-70">
+              Investment Gain
+            </div>
+            <div
+              class="stat-value text-lg font-normal"
+              classList={{
+                "text-success": lifetime().investmentGain >= 0,
+                "text-warning": lifetime().investmentGain < 0,
+              }}
+            >
+              {lifetime().investmentGain >= 0 ? "+" : ""}
+              {formatCurrency(lifetime().investmentGain)}
+            </div>
+            <div class="stat-desc">
+              at {formatPercent(props.settings.investmentReturn)} annual return
+            </div>
+          </div>
+        )}
       </div>
 
       <div class="collapse collapse-arrow bg-base-200/50 mt-4 rounded-lg border border-base-300/30">
@@ -143,6 +175,27 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
             <span>Total of Payments</span>
             <span>{formatCurrency(result().totalOfPayments)}</span>
           </div>
+          {hasInvestment() && (
+            <>
+              <div class="divider my-1" />
+              <div class="flex justify-between">
+                <span>Investment Gain</span>
+                <span
+                  classList={{
+                    "text-success": lifetime().investmentGain >= 0,
+                    "text-warning": lifetime().investmentGain < 0,
+                  }}
+                >
+                  {lifetime().investmentGain >= 0 ? "+" : ""}
+                  {formatCurrency(lifetime().investmentGain)}
+                </span>
+              </div>
+              <div class="flex justify-between font-medium">
+                <span>Effective Cost</span>
+                <span>{formatCurrency(result().totalCost - lifetime().investmentGain)}</span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 

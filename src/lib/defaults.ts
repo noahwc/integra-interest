@@ -36,6 +36,8 @@ export function createDefaultSettings(): Settings {
     mileageCap: 300000,
     annualKm: 15000,
     includeFuel: true,
+    investmentReturn: 0,
+    cashOnHand: 0,
   };
 }
 

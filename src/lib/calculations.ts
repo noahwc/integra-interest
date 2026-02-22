@@ -14,6 +14,27 @@ const PERIODS_PER_YEAR: Record<PaymentFrequency, number> = {
   weekly: 52,
 };
 
+export function calculateInvestmentGain(
+  amountFinanced: number,
+  periodicPayment: number,
+  numberOfPayments: number,
+  annualInvestmentRate: number,
+  paymentFrequency: PaymentFrequency,
+  cashOnHand: number,
+): number {
+  if (amountFinanced <= 0 || numberOfPayments <= 0 || annualInvestmentRate <= 0 || cashOnHand <= 0) {
+    return 0;
+  }
+
+  const investedAmount = Math.min(cashOnHand, amountFinanced);
+  const proportionalPayment = periodicPayment * (investedAmount / amountFinanced);
+
+  const periodsPerYear = PERIODS_PER_YEAR[paymentFrequency];
+  const r = annualInvestmentRate / 100 / periodsPerYear;
+  const compoundFactor = Math.pow(1 + r, numberOfPayments);
+  return investedAmount * compoundFactor - proportionalPayment * ((compoundFactor - 1) / r);
+}
+
 export function calculateScenario(
   carPrice: number,
   fees: DealershipFees,
@@ -25,12 +46,10 @@ export function calculateScenario(
     fees.freightPdi + fees.airConditioningTax + fees.tireLevy + fees.dealerFee;
   const subtotal = carPrice + totalFees;
 
-  const taxRate = combinedTaxRate;
-  const taxAmount = subtotal * taxRate;
+  const taxAmount = subtotal * combinedTaxRate;
   const totalWithTax = subtotal + taxAmount;
 
-  const totalAfterDown = Math.max(0, totalWithTax + otherFees - scenario.downPayment);
-  const amountFinanced = totalAfterDown;
+  const amountFinanced = Math.max(0, totalWithTax + otherFees - scenario.downPayment);
 
   const periodsPerYear = PERIODS_PER_YEAR[scenario.paymentFrequency];
   const termYears = scenario.loanTermMonths / 12;
@@ -55,7 +74,7 @@ export function calculateScenario(
   return {
     totalFees,
     subtotal,
-    taxRate,
+    taxRate: combinedTaxRate,
     taxAmount,
     totalWithTax,
     otherFees,
@@ -77,6 +96,9 @@ export function calculateLifetimeCost(
   vehicleYear: number,
   initialMileage: number,
   includeFuel: boolean,
+  investmentReturn: number,
+  paymentFrequency: PaymentFrequency,
+  cashOnHand: number,
 ): LifetimeCostResult {
   const currentYear = new Date().getFullYear();
   const currentAge = currentYear - vehicleYear;
@@ -96,7 +118,15 @@ export function calculateLifetimeCost(
     : 0;
   const totalFuelCost = annualFuelCost * effectiveYears;
   const totalFinancingCost = financingResult.totalCost;
-  const lifetimeTotalCost = totalFinancingCost + totalFuelCost;
+  const investmentGain = calculateInvestmentGain(
+    financingResult.amountFinanced,
+    financingResult.periodicPayment,
+    financingResult.numberOfPayments,
+    investmentReturn,
+    paymentFrequency,
+    cashOnHand,
+  );
+  const lifetimeTotalCost = totalFinancingCost + totalFuelCost - investmentGain;
   const costPerYear = effectiveYears > 0 ? lifetimeTotalCost / effectiveYears : 0;
   const costPerMonth = costPerYear / 12;
 
@@ -106,6 +136,7 @@ export function calculateLifetimeCost(
     annualFuelCost,
     totalFuelCost,
     totalFinancingCost,
+    investmentGain,
     lifetimeTotalCost,
     costPerYear,
     costPerMonth,

@@ -1,4 +1,5 @@
 import type { AppState } from "./types";
+import { migrateState } from "./storage";
 
 export function encodeShareUrl(state: AppState): string {
   const json = JSON.stringify(state);
@@ -18,6 +19,7 @@ export function decodeShareParam(param: string): AppState | null {
     const json = new TextDecoder().decode(bytes);
     const parsed = JSON.parse(json) as AppState;
     if (parsed.settings && Array.isArray(parsed.cars)) {
+      migrateState(parsed);
       return parsed;
     }
     return null;

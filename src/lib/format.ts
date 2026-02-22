@@ -1,12 +1,14 @@
 import type { PaymentFrequency } from "./types";
 
+const currencyFmt = new Intl.NumberFormat("en-CA", {
+  style: "currency",
+  currency: "CAD",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
+
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-CA", {
-    style: "currency",
-    currency: "CAD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(value);
+  return currencyFmt.format(value);
 }
 
 export function formatPercent(value: number): string {

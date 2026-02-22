@@ -14,6 +14,8 @@ interface SettingsModalProps {
   ) => void;
   onUpdateMaxCarAge: (years: number) => void;
   onUpdateMileageCap: (km: number) => void;
+  onUpdateInvestmentReturn: (rate: number) => void;
+  onUpdateCashOnHand: (amount: number) => void;
   onResetFees: () => void;
 }
 
@@ -27,7 +29,7 @@ export default function SettingsModal(props: SettingsModalProps) {
 
   return (
     <dialog class="modal" classList={{ "modal-open": props.open }}>
-      <div class="modal-box">
+      <div class="modal-box overflow-x-hidden">
         <h3 class="font-light text-xl">Settings</h3>
 
         <div class="form-control w-full mt-4">
@@ -49,19 +51,17 @@ export default function SettingsModal(props: SettingsModalProps) {
               )}
             </For>
           </select>
-          <label class="label">
-            <span class="label-text-alt">
-              Tax breakdown:{" "}
-              <For each={PROVINCE_TAX_DATA[props.settings.province].taxes}>
-                {(tax, i) => (
-                  <>
-                    <Show when={i() > 0}> + </Show>
-                    {tax.label} {(tax.rate * 100).toFixed(1)}%
-                  </>
-                )}
-              </For>
-            </span>
-          </label>
+          <p class="text-xs text-base-content/50 mt-1 px-1">
+            Tax breakdown:{" "}
+            <For each={PROVINCE_TAX_DATA[props.settings.province].taxes}>
+              {(tax, i) => (
+                <>
+                  <Show when={i() > 0}> + </Show>
+                  {tax.label} {(tax.rate * 100).toFixed(1)}%
+                </>
+              )}
+            </For>
+          </p>
         </div>
 
         <div class="divider">Dealership Fees</div>
@@ -150,46 +150,103 @@ export default function SettingsModal(props: SettingsModalProps) {
 
         <div class="divider">Lifetime Limits</div>
 
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text text-xs uppercase tracking-wider opacity-70">Max Car Age (years)</span>
-          </label>
-          <input
-            type="number"
-            inputmode="numeric"
-            class="input input-bordered input-sm w-full"
-            min="1"
-            max="30"
-            step="1"
-            value={props.settings.maxCarAge}
-            onInput={(e) => {
-              const v = parseNumericInput(e.currentTarget.value, 1);
-              if (v !== undefined) props.onUpdateMaxCarAge(Math.round(v));
-            }}
-          />
+        <div class="space-y-3">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-xs uppercase tracking-wider opacity-70">Max Car Age (years)</span>
+            </label>
+            <input
+              type="number"
+              inputmode="numeric"
+              class="input input-bordered input-sm w-full"
+              min="1"
+              max="30"
+              step="1"
+              value={props.settings.maxCarAge}
+              onInput={(e) => {
+                const v = parseNumericInput(e.currentTarget.value, 1);
+                if (v !== undefined) props.onUpdateMaxCarAge(Math.round(v));
+              }}
+            />
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-xs uppercase tracking-wider opacity-70">Mileage Cap (km)</span>
+            </label>
+            <input
+              type="number"
+              inputmode="numeric"
+              class="input input-bordered input-sm w-full"
+              min="0"
+              step="10000"
+              value={props.settings.mileageCap}
+              onInput={(e) => {
+                const v = parseNumericInput(e.currentTarget.value);
+                if (v !== undefined) props.onUpdateMileageCap(Math.round(v));
+              }}
+            />
+            <p class="text-xs text-base-content/50 mt-1 px-1">
+              Car life ends at age or mileage cap, whichever comes first
+            </p>
+          </div>
         </div>
 
-        <div class="form-control">
-          <label class="label">
-            <span class="label-text text-xs uppercase tracking-wider opacity-70">Mileage Cap (km)</span>
-          </label>
-          <input
-            type="number"
-            inputmode="numeric"
-            class="input input-bordered input-sm w-full"
-            min="0"
-            step="10000"
-            value={props.settings.mileageCap}
-            onInput={(e) => {
-              const v = parseNumericInput(e.currentTarget.value);
-              if (v !== undefined) props.onUpdateMileageCap(Math.round(v));
-            }}
-          />
-          <label class="label">
-            <span class="label-text-alt">
-              Car life ends at age or mileage cap, whichever comes first
-            </span>
-          </label>
+        <div class="divider">Investment Analysis</div>
+
+        <div class="space-y-3">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-xs uppercase tracking-wider opacity-70">
+                Expected Investment Return
+              </span>
+            </label>
+            <label class="input input-bordered input-sm w-full flex items-center gap-1">
+              <input
+                type="number"
+                inputmode="decimal"
+                class="grow w-full"
+                min="0"
+                max="30"
+                step="0.1"
+                value={props.settings.investmentReturn}
+                onInput={(e) => {
+                  const v = parseNumericInput(e.currentTarget.value);
+                  if (v !== undefined) props.onUpdateInvestmentReturn(v);
+                }}
+              />
+              %
+            </label>
+            <p class="text-xs text-base-content/50 mt-1 px-1">
+              Expected annual return if cash were invested instead of paying for the car upfront. Set to 0 to disable.
+            </p>
+          </div>
+
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-xs uppercase tracking-wider opacity-70">
+                Cash on Hand
+              </span>
+            </label>
+            <label class="input input-bordered input-sm w-full flex items-center gap-1">
+              $
+              <input
+                type="number"
+                inputmode="numeric"
+                class="grow w-full"
+                min="0"
+                step="1000"
+                value={props.settings.cashOnHand}
+                onInput={(e) => {
+                  const v = parseNumericInput(e.currentTarget.value);
+                  if (v !== undefined) props.onUpdateCashOnHand(v);
+                }}
+              />
+            </label>
+            <p class="text-xs text-base-content/50 mt-1 px-1">
+              Amount of cash available to invest instead of paying for the car upfront. Capped at the financed amount.
+            </p>
+          </div>
         </div>
 
         <div class="modal-action">

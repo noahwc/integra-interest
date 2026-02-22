@@ -21,6 +21,7 @@ import {
   createDefaultState,
   createDefaultCar,
   createDefaultScenario,
+  createDefaultSettings,
   generateId,
 } from "../lib/defaults";
 import { PROVINCE_TAX_DATA } from "../lib/tax-data";
@@ -44,6 +45,9 @@ export default function CarCalculator() {
   const [copied, setCopied] = createSignal(false);
   const [collapsedIds, setCollapsedIds] = createSignal<Set<string>>(new Set());
   const [darkMode, setDarkMode] = createSignal(false);
+  const [headerVisible, setHeaderVisible] = createSignal(true);
+  let lastScrollY = 0;
+  const SCROLL_THRESHOLD = 10;
   const [toast, setToast] = createSignal<{
     message: string;
     type: "info" | "error";
@@ -142,6 +146,15 @@ export default function CarCalculator() {
     }
     document.addEventListener("keydown", handleKeyDown);
     onCleanup(() => document.removeEventListener("keydown", handleKeyDown));
+
+    function handleScroll() {
+      const y = window.scrollY;
+      if (Math.abs(y - lastScrollY) < SCROLL_THRESHOLD) return;
+      setHeaderVisible(y < lastScrollY || y < 50);
+      lastScrollY = y;
+    }
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    onCleanup(() => window.removeEventListener("scroll", handleScroll));
   });
 
   // Persist collapsed IDs
@@ -155,8 +168,7 @@ export default function CarCalculator() {
   });
 
   createEffect(() => {
-    const serialized = JSON.stringify(state);
-    saveState(JSON.parse(serialized));
+    saveState(JSON.stringify(state));
   });
 
   function addCar() {
@@ -333,17 +345,23 @@ export default function CarCalculator() {
     setState("settings", "mileageCap", km);
   }
 
+  function updateInvestmentReturn(rate: number) {
+    setState("settings", "investmentReturn", rate);
+  }
+
+  function updateCashOnHand(amount: number) {
+    setState("settings", "cashOnHand", amount);
+  }
+
   function resetFees() {
-    setState("settings", "fees", {
-      freightPdi: 1800,
-      airConditioningTax: 100,
-      tireLevy: 15,
-      dealerFee: 500,
-    });
-    setState("settings", "maxCarAge", 15);
-    setState("settings", "mileageCap", 300000);
-    setState("settings", "annualKm", 15000);
-    setState("settings", "includeFuel", true);
+    const defaults = createDefaultSettings();
+    setState("settings", "fees", defaults.fees);
+    setState("settings", "maxCarAge", defaults.maxCarAge);
+    setState("settings", "mileageCap", defaults.mileageCap);
+    setState("settings", "annualKm", defaults.annualKm);
+    setState("settings", "includeFuel", defaults.includeFuel);
+    setState("settings", "investmentReturn", defaults.investmentReturn);
+    setState("settings", "cashOnHand", defaults.cashOnHand);
   }
 
   function carCardHandlers(car: Car) {
@@ -380,13 +398,16 @@ export default function CarCalculator() {
 
   return (
     <div class="container mx-auto p-4 max-w-full">
-      <div class="navbar bg-base-100 rounded-box shadow mb-6">
+      <div
+        class="navbar bg-base-100 rounded-box shadow mb-6 sticky top-4 z-40 header-bar"
+        classList={{ "header-hidden": !headerVisible() }}
+      >
         <div class="flex-1">
-          <span class="text-xl font-bold px-4">Car Cost Calculator</span>
+          <span class="text-xl font-bold px-4">Car Cost</span>
         </div>
 
         <div class="flex items-center gap-1">
-          <div class="dropdown dropdown-end lg:hidden">
+          <div class="dropdown dropdown-end lg:hidden order-last">
             <button tabindex="0" class="btn btn-ghost btn-sm" title="Menu">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -598,6 +619,8 @@ export default function CarCalculator() {
         onUpdateFee={updateFee}
         onUpdateMaxCarAge={updateMaxCarAge}
         onUpdateMileageCap={updateMileageCap}
+        onUpdateInvestmentReturn={updateInvestmentReturn}
+        onUpdateCashOnHand={updateCashOnHand}
         onResetFees={resetFees}
       />
 

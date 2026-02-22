@@ -67,6 +67,8 @@ export default function CarCard(props: CarCardProps) {
     const result = summaryResult();
     if (!result) return null;
     const s = effectiveSettings();
+    const scenario = activeScenario();
+    if (!scenario) return null;
     return calculateLifetimeCost(
       result,
       props.car.fuelInputs,
@@ -76,6 +78,9 @@ export default function CarCard(props: CarCardProps) {
       props.car.vehicleYear,
       props.car.initialMileage,
       s.includeFuel,
+      s.investmentReturn,
+      scenario.paymentFrequency,
+      s.cashOnHand,
     );
   };
 

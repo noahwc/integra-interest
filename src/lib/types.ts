@@ -38,6 +38,8 @@ export interface Settings {
   mileageCap: number;
   annualKm: number;
   includeFuel: boolean;
+  investmentReturn: number;
+  cashOnHand: number;
 }
 
 export interface FinancingScenario {
@@ -95,6 +97,7 @@ export interface LifetimeCostResult {
   annualFuelCost: number;
   totalFuelCost: number;
   totalFinancingCost: number;
+  investmentGain: number;
   lifetimeTotalCost: number;
   costPerYear: number;
   costPerMonth: number;

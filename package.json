@@ -6,6 +6,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "lint": "eslint src/",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "preview": "astro preview",
     "astro": "astro"
   },
@@ -21,6 +23,7 @@
     "@eslint/js": "^9.39.3",
     "eslint": "^9.39.3",
     "eslint-plugin-solid": "^0.14.5",
-    "typescript-eslint": "^8.56.0"
+    "typescript-eslint": "^8.56.0",
+    "vitest": "^4.0.18"
   }
 }

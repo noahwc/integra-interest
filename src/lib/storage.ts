@@ -9,6 +9,9 @@ export function migrateState(state: AppState): void {
     if (!car.overrides) {
       car.overrides = {};
     }
+    if ((car as Record<string, unknown>).description === undefined) {
+      car.description = "";
+    }
     for (const scenario of car.scenarios) {
       if ((scenario as Record<string, unknown>).payInFull === undefined) {
         scenario.payInFull = false;

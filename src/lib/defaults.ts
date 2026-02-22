@@ -57,6 +57,7 @@ export function createDefaultCar(label?: string): Car {
   return {
     id: generateId(),
     label: label ?? "New Car",
+    description: "",
     price: 35000,
     vehicleYear: new Date().getFullYear(),
     initialMileage: 0,

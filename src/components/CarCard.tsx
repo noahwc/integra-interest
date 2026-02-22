@@ -23,6 +23,7 @@ interface CarCardProps {
   collapsed: boolean;
   onToggleCollapsed: () => void;
   onUpdateLabel: (label: string) => void;
+  onUpdateDescription: (desc: string) => void;
   onUpdatePrice: (price: number) => void;
   onUpdateVehicleYear: (year: number) => void;
   onUpdateInitialMileage: (km: number) => void;
@@ -212,7 +213,15 @@ export default function CarCard(props: CarCardProps) {
           }}
         >
           <div>
-            <div class="grid grid-cols-3 gap-3">
+            <textarea
+              class="textarea textarea-bordered textarea-sm w-full resize-none leading-snug"
+              placeholder="Notes..."
+              rows="2"
+              value={props.car.description}
+              onInput={(e) => props.onUpdateDescription(e.currentTarget.value)}
+            />
+
+            <div class="grid grid-cols-3 gap-3 mt-3">
               <div class="form-control">
                 <label class="label py-1">
                   <span class="label-text text-xs uppercase tracking-wider opacity-70">

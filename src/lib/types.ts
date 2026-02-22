@@ -62,6 +62,7 @@ export interface CarOverrides {
 export interface Car {
   id: string;
   label: string;
+  description: string;
   price: number;
   vehicleYear: number;
   initialMileage: number;

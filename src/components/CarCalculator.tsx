@@ -210,6 +210,10 @@ export default function CarCalculator() {
     setState("cars", (c) => c.id === carId, "label", label);
   }
 
+  function updateCarDescription(carId: string, description: string) {
+    setState("cars", (c) => c.id === carId, "description", description);
+  }
+
   function updateCarPrice(carId: string, price: number) {
     setState("cars", (c) => c.id === carId, "price", price);
   }
@@ -370,6 +374,7 @@ export default function CarCalculator() {
       settings: state.settings,
       onToggleCollapsed: () => toggleCollapsed(car.id),
       onUpdateLabel: (label: string) => updateCarLabel(car.id, label),
+      onUpdateDescription: (desc: string) => updateCarDescription(car.id, desc),
       onUpdatePrice: (price: number) => updateCarPrice(car.id, price),
       onUpdateVehicleYear: (year: number) => updateVehicleYear(car.id, year),
       onUpdateInitialMileage: (km: number) => updateInitialMileage(car.id, km),

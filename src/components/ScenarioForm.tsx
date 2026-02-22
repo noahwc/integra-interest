@@ -1,6 +1,6 @@
 import { For } from "solid-js";
 import type { FinancingScenario, PaymentFrequency } from "../lib/types";
-import { FREQUENCY_LABELS, LOAN_TERM_OPTIONS, parseNumericInput } from "../lib/format";
+import { FREQUENCY_LABELS, parseNumericInput } from "../lib/format";
 
 interface ScenarioFormProps {
   scenario: FinancingScenario;
@@ -38,22 +38,22 @@ export default function ScenarioForm(props: ScenarioFormProps) {
 
         <div class="form-control">
           <label class="label py-1">
-            <span class="label-text text-xs uppercase tracking-wider opacity-70">Loan Term</span>
+            <span class="label-text text-xs uppercase tracking-wider opacity-70">Term (months)</span>
           </label>
-          <select
-            class="select select-bordered select-sm w-full"
+          <input
+            type="number"
+            inputmode="numeric"
+            class="input input-bordered input-sm w-full"
+            min="1"
+            max="96"
+            step="1"
             value={props.scenario.loanTermMonths}
-            onChange={(e) =>
-              props.onUpdate(
-                "loanTermMonths",
-                parseInt(e.currentTarget.value, 10),
-              )
-            }
-          >
-            <For each={LOAN_TERM_OPTIONS}>
-              {(opt) => <option value={opt.value}>{opt.label}</option>}
-            </For>
-          </select>
+            onInput={(e) => {
+              const v = parseNumericInput(e.currentTarget.value, 1);
+              if (v !== undefined)
+                props.onUpdate("loanTermMonths", Math.round(v));
+            }}
+          />
         </div>
 
       </div>

@@ -29,13 +29,3 @@ export const FREQUENCY_LABELS: Record<PaymentFrequency, string> = {
   semimonthly: "Semi-monthly",
   weekly: "Weekly",
 };
-
-export const LOAN_TERM_OPTIONS = [
-  { value: 12, label: "1 year" },
-  { value: 24, label: "2 years" },
-  { value: 36, label: "3 years" },
-  { value: 48, label: "4 years" },
-  { value: 60, label: "5 years" },
-  { value: 72, label: "6 years" },
-  { value: 84, label: "7 years" },
-];

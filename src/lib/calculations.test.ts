@@ -253,17 +253,17 @@ describe("calculateInvestmentGain", () => {
   describe("gain vs. loss scenarios", () => {
     it("positive gain at 10% return with $50k cash", () => {
       const gain = calculateInvestmentGain(50000, effectiveDown, PMT, N, 10, "monthly");
-      expect(gain).toBeCloseTo(20179.61, 2);
+      expect(gain).toBeCloseTo(22063.61, 2);
     });
 
     it("positive gain at 3% return with $50k cash", () => {
       const gain = calculateInvestmentGain(50000, effectiveDown, PMT, N, 3, "monthly");
-      expect(gain).toBeCloseTo(3078.12, 2);
+      expect(gain).toBeCloseTo(4962.12, 2);
     });
 
-    it("slightly negative at 1% return with $50k cash", () => {
+    it("positive gain at 1% return with $50k cash", () => {
       const gain = calculateInvestmentGain(50000, effectiveDown, PMT, N, 1, "monthly");
-      expect(gain).toBeCloseTo(-358.68, 2);
+      expect(gain).toBeCloseTo(1525.32, 2);
     });
   });
 
@@ -271,7 +271,7 @@ describe("calculateInvestmentGain", () => {
     it("partial cash after down payment", () => {
       // $60k cash, $10k down => $50k invested, same as standard with $50k cash & $0 down
       const gain = calculateInvestmentGain(60000, 10000, PMT, N, 10, "monthly");
-      expect(gain).toBeCloseTo(20179.61, 2);
+      expect(gain).toBeCloseTo(22063.61, 2);
     });
 
     it("cash equals down payment leaves nothing to invest", () => {
@@ -319,8 +319,8 @@ describe("calculateInvestmentGain", () => {
       7,
       "biweekly",
     );
-    // $30k invested but ~$720/mo withdrawals exceed growth at 7%, goes negative
-    expect(gain).toBeCloseTo(-18566.39, 1);
+    // $30k invested, biweekly payments converted to monthly, compounding monthly over 72 months
+    expect(gain).toBeCloseTo(3252.35, 2);
   });
 });
 
@@ -438,9 +438,9 @@ describe("calculateLifetimeCost", () => {
       "monthly",
       s.amountFinanced,
     );
-    expect(result.investmentGain).toBeCloseTo(6145.88, 2);
-    expect(result.costPerYear).toBeCloseTo(5152.96, 1);
-    expect(result.costPerMonth).toBeCloseTo(429.41, 1);
+    expect(result.investmentGain).toBeCloseTo(15750.93, 2);
+    expect(result.costPerYear).toBeCloseTo(4512.62, 1);
+    expect(result.costPerMonth).toBeCloseTo(376.05, 1);
   });
 
   it("returns zero cost rates when car is past maxAge", () => {

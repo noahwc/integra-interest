@@ -32,7 +32,8 @@ export function calculateInvestmentGain(
   const monthlyRate = annualInvestmentRate / 100 / 12;
   const monthlyPayment = (periodicPayment * periodsPerYear) / 12;
   const compoundFactor = Math.pow(1 + monthlyRate, totalMonths);
-  return initialInvested * compoundFactor - monthlyPayment * ((compoundFactor - 1) / monthlyRate);
+  const fv = initialInvested * compoundFactor - monthlyPayment * ((compoundFactor - 1) / monthlyRate);
+  return fv + monthlyPayment * totalMonths - initialInvested;
 }
 
 export function calculateScenario(

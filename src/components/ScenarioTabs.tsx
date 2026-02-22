@@ -21,7 +21,7 @@ export default function ScenarioTabs(props: ScenarioTabsProps) {
         {(scenario, index) => (
           <button
             role="tab"
-            class="px-3 py-1.5 text-sm rounded-md transition-all whitespace-nowrap flex items-center gap-1"
+            class="px-3 py-1.5 text-sm rounded-md transition-all whitespace-nowrap flex items-center gap-1 shrink-0"
             classList={{
               "bg-base-100 shadow-sm font-medium text-base-content":
                 index() === props.activeIndex,
@@ -36,7 +36,8 @@ export default function ScenarioTabs(props: ScenarioTabsProps) {
             >
               <input
                 type="text"
-                class="bg-transparent outline-none w-16 min-w-0"
+                class="bg-transparent outline-none min-w-0"
+                style={{ width: `${Math.max(scenario.label.length, 1)}ch` }}
                 value={scenario.label}
                 onInput={(e) =>
                   props.onRename(scenario.id, e.currentTarget.value)
@@ -80,7 +81,7 @@ export default function ScenarioTabs(props: ScenarioTabsProps) {
       </For>
       <button
         role="tab"
-        class="px-3 py-1.5 text-sm rounded-md text-base-content/30 hover:text-base-content/60 hover:bg-base-100/50 transition-all"
+        class="px-3 py-1.5 text-sm rounded-md text-base-content/30 hover:text-base-content/60 hover:bg-base-100/50 transition-all shrink-0"
         onClick={() => props.onAdd()}
       >
         +

@@ -36,6 +36,7 @@ interface CarCardProps {
   onRemove: () => void;
   onSetActiveScenario: (index: number) => void;
   onAddScenario: () => void;
+  onDuplicateScenario: (scenarioId: string) => void;
   onRemoveScenario: (scenarioId: string) => void;
   onUpdateScenario: <K extends keyof FinancingScenario>(
     scenarioId: string,
@@ -506,6 +507,7 @@ export default function CarCard(props: CarCardProps) {
               activeIndex={props.car.activeScenarioIndex}
               onSelect={props.onSetActiveScenario}
               onAdd={props.onAddScenario}
+              onDuplicate={props.onDuplicateScenario}
               onRemove={props.onRemoveScenario}
             />
 

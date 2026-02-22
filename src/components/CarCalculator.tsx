@@ -299,6 +299,30 @@ export default function CarCalculator() {
     setState("cars", (c) => c.id === carId, "activeScenarioIndex", newIndex);
   }
 
+  function duplicateScenario(carId: string, scenarioId: string) {
+    const car = state.cars.find((c) => c.id === carId);
+    if (!car) return;
+    const scenario = car.scenarios.find((s) => s.id === scenarioId);
+    if (!scenario) return;
+    const cloned: FinancingScenario = {
+      ...scenario,
+      id: generateId(),
+      label: `${scenario.label} (Copy)`,
+    };
+    const index = car.scenarios.indexOf(scenario);
+    setState(
+      "cars",
+      (c) => c.id === carId,
+      "scenarios",
+      (s) => {
+        const copy = [...s];
+        copy.splice(index + 1, 0, cloned);
+        return copy;
+      },
+    );
+    setState("cars", (c) => c.id === carId, "activeScenarioIndex", index + 1);
+  }
+
   function removeScenario(carId: string, scenarioId: string) {
     setState(
       "cars",
@@ -387,6 +411,8 @@ export default function CarCalculator() {
       onRemove: () => removeCar(car.id),
       onSetActiveScenario: (index: number) => setActiveScenario(car.id, index),
       onAddScenario: () => addScenario(car.id),
+      onDuplicateScenario: (scenarioId: string) =>
+        duplicateScenario(car.id, scenarioId),
       onRemoveScenario: (scenarioId: string) =>
         removeScenario(car.id, scenarioId),
       onUpdateScenario: <K extends keyof FinancingScenario>(

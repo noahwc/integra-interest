@@ -249,3 +249,8 @@
 .alert {
   border-radius: 1rem;
 }
+
+/* Checkbox rounding */
+.checkbox {
+  border-radius: 0.375rem;
+}

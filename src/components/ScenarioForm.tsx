@@ -59,10 +59,22 @@ export default function ScenarioForm(props: ScenarioFormProps) {
       </div>
 
       <div class="form-control">
-        <label class="label py-1">
+        <label class="label py-1 flex items-center justify-between">
           <span class="label-text text-xs uppercase tracking-wider opacity-70">Down Payment</span>
+          <label class="flex items-center gap-1.5 cursor-pointer">
+            <input
+              type="checkbox"
+              class="checkbox checkbox-xs checkbox-primary"
+              checked={props.scenario.payInFull}
+              onChange={(e) => props.onUpdate("payInFull", e.currentTarget.checked)}
+            />
+            <span class="label-text text-xs opacity-70">Pay in Full</span>
+          </label>
         </label>
-        <label class="input input-bordered input-sm w-full flex items-center gap-1">
+        <label
+          class="input input-bordered input-sm w-full flex items-center gap-1"
+          classList={{ "opacity-50": props.scenario.payInFull }}
+        >
           $
           <input
             type="number"
@@ -70,6 +82,7 @@ export default function ScenarioForm(props: ScenarioFormProps) {
             class="grow w-full"
             min="0"
             step="500"
+            disabled={props.scenario.payInFull}
             value={props.scenario.downPayment}
             onInput={(e) => {
               const v = parseNumericInput(e.currentTarget.value);

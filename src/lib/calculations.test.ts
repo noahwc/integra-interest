@@ -38,6 +38,7 @@ function makeScenario(
     interestRate: 6.99,
     loanTermMonths: 72,
     downPayment: 0,
+    payInFull: false,
     paymentFrequency: "monthly",
     ...overrides,
   };
@@ -182,6 +183,32 @@ describe("calculateScenario", () => {
       expect(result.periodicPayment).toBe(0);
       expect(result.totalCost).toBeCloseTo(42278.95, 2);
     });
+
+    it("payInFull covers full cost with no financing", () => {
+      const result = calculateScenario(
+        35000,
+        DEFAULT_FEES,
+        makeScenario({ payInFull: true }),
+        ON_TAX,
+      );
+      expect(result.amountFinanced).toBe(0);
+      expect(result.periodicPayment).toBe(0);
+      expect(result.totalOfPayments).toBe(0);
+      expect(result.totalInterest).toBe(0);
+      expect(result.totalCost).toBeCloseTo(42278.95, 2);
+    });
+
+    it("payInFull with otherFees includes them in down payment", () => {
+      const result = calculateScenario(
+        35000,
+        DEFAULT_FEES,
+        makeScenario({ payInFull: true }),
+        ON_TAX,
+        500,
+      );
+      expect(result.amountFinanced).toBe(0);
+      expect(result.totalCost).toBeCloseTo(42778.95, 2);
+    });
   });
 
   describe("otherFees", () => {
@@ -216,69 +243,63 @@ describe("calculateScenario", () => {
 // ── calculateInvestmentGain ───────────────────────────
 
 describe("calculateInvestmentGain", () => {
-  // Use exact values from standard scenario for precision
+  // Standard scenario: $35k car, default fees, ON 13%, $0 down, 6.99%, 72mo monthly
+  // effectiveDown = totalCost - totalOfPayments = 0 (since downPayment = 0)
   const std = standardResult();
-  const P = std.amountFinanced;
+  const effectiveDown = std.totalCost - std.totalOfPayments; // 0
   const PMT = std.periodicPayment;
   const N = std.numberOfPayments;
 
   describe("gain vs. loss scenarios", () => {
-    it("break-even when investment rate = loan rate (6.99%)", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 6.99, "monthly", P);
-      expect(gain).toBeCloseTo(0, 2);
+    it("positive gain at 10% return with $50k cash", () => {
+      const gain = calculateInvestmentGain(50000, effectiveDown, PMT, N, 10, "monthly");
+      expect(gain).toBeCloseTo(20179.61, 2);
     });
 
-    it("positive gain at 10% return", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 10, "monthly", P);
-      expect(gain).toBeCloseTo(6145.88, 2);
+    it("positive gain at 3% return with $50k cash", () => {
+      const gain = calculateInvestmentGain(50000, effectiveDown, PMT, N, 3, "monthly");
+      expect(gain).toBeCloseTo(3078.12, 2);
     });
 
-    it("negative gain at 3% return", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 3, "monthly", P);
-      expect(gain).toBeCloseTo(-6163.58, 2);
-    });
-
-    it("strongly negative at 1% return", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 1, "monthly", P);
-      expect(gain).toBeCloseTo(-8556.97, 2);
-    });
-
-    it("slightly negative at 5% return", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 5, "monthly", P);
-      expect(gain).toBeCloseTo(-3326.4, 1);
+    it("slightly negative at 1% return with $50k cash", () => {
+      const gain = calculateInvestmentGain(50000, effectiveDown, PMT, N, 1, "monthly");
+      expect(gain).toBeCloseTo(-358.68, 2);
     });
   });
 
-  describe("cashOnHand variations", () => {
-    it("partial cash ($20,000) at 7%", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 7, "monthly", 20000);
-      expect(gain).toBeCloseTo(8.56, 2);
+  describe("cashOnHand / effectiveDown variations", () => {
+    it("partial cash after down payment", () => {
+      // $60k cash, $10k down => $50k invested, same as standard with $50k cash & $0 down
+      const gain = calculateInvestmentGain(60000, 10000, PMT, N, 10, "monthly");
+      expect(gain).toBeCloseTo(20179.61, 2);
     });
 
-    it("cash exceeding principal ($100k) is capped at amountFinanced", () => {
-      const gain = calculateInvestmentGain(P, PMT, N, 7, "monthly", 100000);
-      // Should behave same as cash = P
-      const gainAtP = calculateInvestmentGain(P, PMT, N, 7, "monthly", P);
-      expect(gain).toBeCloseTo(gainAtP, 2);
-      expect(gain).toBeCloseTo(18.1, 1);
+    it("cash equals down payment leaves nothing to invest", () => {
+      const gain = calculateInvestmentGain(10000, 10000, PMT, N, 10, "monthly");
+      expect(gain).toBe(0);
+    });
+
+    it("cash less than down payment returns 0", () => {
+      const gain = calculateInvestmentGain(5000, 10000, PMT, N, 10, "monthly");
+      expect(gain).toBe(0);
     });
   });
 
   describe("edge cases (guard clauses return 0)", () => {
     it("returns 0 when annualInvestmentRate = 0", () => {
-      expect(calculateInvestmentGain(P, PMT, N, 0, "monthly", P)).toBe(0);
+      expect(calculateInvestmentGain(50000, 0, PMT, N, 0, "monthly")).toBe(0);
     });
 
     it("returns 0 when cashOnHand = 0", () => {
-      expect(calculateInvestmentGain(P, PMT, N, 7, "monthly", 0)).toBe(0);
-    });
-
-    it("returns 0 when amountFinanced = 0", () => {
-      expect(calculateInvestmentGain(0, 0, N, 7, "monthly", 50000)).toBe(0);
+      expect(calculateInvestmentGain(0, 0, PMT, N, 7, "monthly")).toBe(0);
     });
 
     it("returns 0 when numberOfPayments = 0", () => {
-      expect(calculateInvestmentGain(P, PMT, 0, 7, "monthly", P)).toBe(0);
+      expect(calculateInvestmentGain(50000, 0, PMT, 0, 7, "monthly")).toBe(0);
+    });
+
+    it("returns 0 when initialInvested <= 0", () => {
+      expect(calculateInvestmentGain(1000, 5000, PMT, N, 7, "monthly")).toBe(0);
     });
   });
 
@@ -289,15 +310,17 @@ describe("calculateInvestmentGain", () => {
       makeScenario({ paymentFrequency: "biweekly" }),
       ON_TAX,
     );
+    const bwDown = bw.totalCost - bw.totalOfPayments; // 0
     const gain = calculateInvestmentGain(
-      bw.amountFinanced,
+      30000,
+      bwDown,
       bw.periodicPayment,
       bw.numberOfPayments,
       7,
       "biweekly",
-      30000,
     );
-    expect(gain).toBeCloseTo(12.79, 2);
+    // $30k invested but ~$720/mo withdrawals exceed growth at 7%, goes negative
+    expect(gain).toBeCloseTo(-18566.39, 1);
   });
 });
 

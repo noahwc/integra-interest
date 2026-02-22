@@ -48,6 +48,7 @@ export interface FinancingScenario {
   interestRate: number;
   loanTermMonths: number;
   downPayment: number;
+  payInFull: boolean;
   paymentFrequency: PaymentFrequency;
 }
 

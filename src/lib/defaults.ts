@@ -48,6 +48,7 @@ export function createDefaultScenario(label?: string): FinancingScenario {
     interestRate: 6.99,
     loanTermMonths: 60,
     downPayment: 0,
+    payInFull: false,
     paymentFrequency: "monthly",
   };
 }

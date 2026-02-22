@@ -67,7 +67,7 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
   const showRange = () => props.settings.annualKm > 0;
 
   const hasInvestment = () =>
-    props.settings.investmentReturn > 0 && props.settings.cashOnHand > 0 && result().amountFinanced > 0;
+    props.settings.investmentReturn > 0 && props.settings.cashOnHand > 0;
 
   return (
     <div class="mt-4">
@@ -161,9 +161,13 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
           )}
           <div class="divider my-1" />
           <div class="flex justify-between">
-            <span>Down Payment</span>
+            <span>Down Payment{props.scenario.payInFull ? " (Full)" : ""}</span>
             <span class="text-success">
-              -{formatCurrency(props.scenario.downPayment)}
+              -{formatCurrency(
+                props.scenario.payInFull
+                  ? result().totalWithTax + result().otherFees
+                  : props.scenario.downPayment
+              )}
             </span>
           </div>
           <div class="flex justify-between font-medium">

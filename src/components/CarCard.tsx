@@ -250,7 +250,7 @@ export default function CarCard(props: CarCardProps) {
                   step="1"
                   value={props.car.vehicleYear}
                   onInput={(e) => {
-                    const v = parseNumericInput(e.currentTarget.value, 1900);
+                    const v = parseNumericInput(e.currentTarget.value);
                     if (v !== undefined)
                       props.onUpdateVehicleYear(Math.round(v));
                   }}

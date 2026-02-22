@@ -15,24 +15,24 @@ const PERIODS_PER_YEAR: Record<PaymentFrequency, number> = {
 };
 
 export function calculateInvestmentGain(
-  amountFinanced: number,
+  cashOnHand: number,
+  effectiveDown: number,
   periodicPayment: number,
   numberOfPayments: number,
   annualInvestmentRate: number,
   paymentFrequency: PaymentFrequency,
-  cashOnHand: number,
 ): number {
-  if (amountFinanced <= 0 || numberOfPayments <= 0 || annualInvestmentRate <= 0 || cashOnHand <= 0) {
-    return 0;
-  }
-
-  const investedAmount = Math.min(cashOnHand, amountFinanced);
-  const proportionalPayment = periodicPayment * (investedAmount / amountFinanced);
+  const initialInvested = cashOnHand - effectiveDown;
+  if (initialInvested <= 0 || annualInvestmentRate <= 0) return 0;
 
   const periodsPerYear = PERIODS_PER_YEAR[paymentFrequency];
-  const r = annualInvestmentRate / 100 / periodsPerYear;
-  const compoundFactor = Math.pow(1 + r, numberOfPayments);
-  return investedAmount * compoundFactor - proportionalPayment * ((compoundFactor - 1) / r);
+  const totalMonths = Math.round((numberOfPayments / periodsPerYear) * 12);
+  if (totalMonths <= 0) return 0;
+
+  const monthlyRate = annualInvestmentRate / 100 / 12;
+  const monthlyPayment = (periodicPayment * periodsPerYear) / 12;
+  const compoundFactor = Math.pow(1 + monthlyRate, totalMonths);
+  return initialInvested * compoundFactor - monthlyPayment * ((compoundFactor - 1) / monthlyRate);
 }
 
 export function calculateScenario(
@@ -49,7 +49,10 @@ export function calculateScenario(
   const taxAmount = subtotal * combinedTaxRate;
   const totalWithTax = subtotal + taxAmount;
 
-  const amountFinanced = Math.max(0, totalWithTax + otherFees - scenario.downPayment);
+  const effectiveDown = scenario.payInFull
+    ? totalWithTax + otherFees
+    : scenario.downPayment;
+  const amountFinanced = Math.max(0, totalWithTax + otherFees - effectiveDown);
 
   const periodsPerYear = PERIODS_PER_YEAR[scenario.paymentFrequency];
   const termYears = scenario.loanTermMonths / 12;
@@ -69,7 +72,7 @@ export function calculateScenario(
 
   const totalOfPayments = periodicPayment * numberOfPayments;
   const totalInterest = totalOfPayments - amountFinanced;
-  const totalCost = scenario.downPayment + totalOfPayments;
+  const totalCost = effectiveDown + totalOfPayments;
 
   return {
     totalFees,
@@ -118,13 +121,14 @@ export function calculateLifetimeCost(
     : 0;
   const totalFuelCost = annualFuelCost * effectiveYears;
   const totalFinancingCost = financingResult.totalCost;
+  const effectiveDown = totalFinancingCost - financingResult.totalOfPayments;
   const investmentGain = calculateInvestmentGain(
-    financingResult.amountFinanced,
+    cashOnHand,
+    effectiveDown,
     financingResult.periodicPayment,
     financingResult.numberOfPayments,
     investmentReturn,
     paymentFrequency,
-    cashOnHand,
   );
   const lifetimeTotalCost = totalFinancingCost + totalFuelCost - investmentGain;
   const costPerYear = effectiveYears > 0 ? lifetimeTotalCost / effectiveYears : 0;

@@ -67,6 +67,7 @@ export interface Car {
   vehicleYear: number;
   initialMileage: number;
   otherFees: number;
+  insuranceCostPerYear: number;
   fuelInputs: FuelInputs;
   overrides: CarOverrides;
   scenarios: FinancingScenario[];
@@ -98,6 +99,8 @@ export interface LifetimeCostResult {
   limitedBy: "years" | "mileage";
   annualFuelCost: number;
   totalFuelCost: number;
+  annualInsuranceCost: number;
+  totalInsuranceCost: number;
   totalFinancingCost: number;
   investmentGain: number;
   lifetimeTotalCost: number;

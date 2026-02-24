@@ -28,6 +28,7 @@ interface CarCardProps {
   onUpdateVehicleYear: (year: number) => void;
   onUpdateInitialMileage: (km: number) => void;
   onUpdateOtherFees: (amount: number) => void;
+  onUpdateInsurance: (amount: number) => void;
   onUpdateFuelInput: <K extends keyof FuelInputs>(
     field: K,
     value: number,
@@ -83,6 +84,7 @@ export default function CarCard(props: CarCardProps) {
       s.investmentReturn,
       scenario.paymentFrequency,
       s.cashOnHand,
+      props.car.insuranceCostPerYear,
     );
   };
 
@@ -119,6 +121,7 @@ export default function CarCard(props: CarCardProps) {
       s.includeFuel,
       s.investmentReturn,
       s.cashOnHand,
+      props.car.insuranceCostPerYear,
     );
     if (scenario.payInFull) {
       props.onUpdateScenario(scenario.id, "payInFull", false);
@@ -314,29 +317,53 @@ export default function CarCard(props: CarCardProps) {
               </div>
             </div>
 
-            <div class="form-control">
-              <label class="label py-1 mt-4">
-                <span class="label-text text-xs uppercase tracking-wider opacity-70">
-                  Other Fees (post-tax)
-                </span>
-              </label>
-              <label class="input input-bordered input-sm w-full flex items-center gap-1">
-                $
-                <input
-                  type="number"
-                  inputmode="numeric"
-                  class="grow w-full"
-                  step="100"
-                  value={props.car.otherFees}
-                  onInput={(e) => {
-                    const v = parseNumericInput(
-                      e.currentTarget.value,
-                      -Infinity,
-                    );
-                    if (v !== undefined) props.onUpdateOtherFees(v);
-                  }}
-                />
-              </label>
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <div class="form-control">
+                <label class="label py-1">
+                  <span class="label-text text-xs uppercase tracking-wider opacity-70">
+                    Other Fees (post-tax)
+                  </span>
+                </label>
+                <label class="input input-bordered input-sm w-full flex items-center gap-1">
+                  $
+                  <input
+                    type="number"
+                    inputmode="numeric"
+                    class="grow w-full"
+                    step="100"
+                    value={props.car.otherFees}
+                    onInput={(e) => {
+                      const v = parseNumericInput(
+                        e.currentTarget.value,
+                        -Infinity,
+                      );
+                      if (v !== undefined) props.onUpdateOtherFees(v);
+                    }}
+                  />
+                </label>
+              </div>
+              <div class="form-control">
+                <label class="label py-1">
+                  <span class="label-text text-xs uppercase tracking-wider opacity-70">
+                    Insurance ($/yr)
+                  </span>
+                </label>
+                <label class="input input-bordered input-sm w-full flex items-center gap-1">
+                  $
+                  <input
+                    type="number"
+                    inputmode="numeric"
+                    class="grow w-full"
+                    min="0"
+                    step="100"
+                    value={props.car.insuranceCostPerYear}
+                    onInput={(e) => {
+                      const v = parseNumericInput(e.currentTarget.value);
+                      if (v !== undefined) props.onUpdateInsurance(v);
+                    }}
+                  />
+                </label>
+              </div>
             </div>
 
             <Show when={effectiveSettings().includeFuel}>

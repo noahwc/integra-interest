@@ -106,6 +106,7 @@ export function optimizeDownPayment(
   includeFuel: boolean,
   investmentReturn: number,
   cashOnHand: number,
+  insuranceCostPerYear: number = 0,
 ): number {
   const costForDown = (down: number): number => {
     const trial: FinancingScenario = { ...scenario, downPayment: down, payInFull: false };
@@ -113,7 +114,7 @@ export function optimizeDownPayment(
     const lifetime = calculateLifetimeCost(
       result, fuelInputs, annualKm, maxCarAge, mileageCap,
       vehicleYear, initialMileage, includeFuel, investmentReturn,
-      trial.paymentFrequency, cashOnHand,
+      trial.paymentFrequency, cashOnHand, insuranceCostPerYear,
     );
     return lifetime.costPerYear;
   };
@@ -162,6 +163,7 @@ export function calculateLifetimeCost(
   investmentReturn: number,
   paymentFrequency: PaymentFrequency,
   cashOnHand: number,
+  insuranceCostPerYear: number = 0,
 ): LifetimeCostResult {
   const currentYear = new Date().getFullYear();
   const currentAge = currentYear - vehicleYear;
@@ -180,6 +182,8 @@ export function calculateLifetimeCost(
       fuelInputs.fuelPricePerLitre
     : 0;
   const totalFuelCost = annualFuelCost * effectiveYears;
+  const annualInsuranceCost = insuranceCostPerYear;
+  const totalInsuranceCost = annualInsuranceCost * effectiveYears;
   const totalFinancingCost = financingResult.totalCost;
   const effectiveDown = totalFinancingCost - financingResult.totalOfPayments;
   const investmentGain = calculateInvestmentGain(
@@ -190,7 +194,7 @@ export function calculateLifetimeCost(
     investmentReturn,
     paymentFrequency,
   );
-  const lifetimeTotalCost = totalFinancingCost + totalFuelCost - investmentGain;
+  const lifetimeTotalCost = totalFinancingCost + totalFuelCost + totalInsuranceCost - investmentGain;
   const costPerYear = effectiveYears > 0 ? lifetimeTotalCost / effectiveYears : 0;
   const costPerMonth = costPerYear / 12;
 
@@ -199,6 +203,8 @@ export function calculateLifetimeCost(
     limitedBy,
     annualFuelCost,
     totalFuelCost,
+    annualInsuranceCost,
+    totalInsuranceCost,
     totalFinancingCost,
     investmentGain,
     lifetimeTotalCost,

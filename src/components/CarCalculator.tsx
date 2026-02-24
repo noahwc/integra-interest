@@ -238,6 +238,10 @@ export default function CarCalculator() {
     setState("cars", (c) => c.id === carId, "otherFees", amount);
   }
 
+  function updateInsurance(carId: string, amount: number) {
+    setState("cars", (c) => c.id === carId, "insuranceCostPerYear", amount);
+  }
+
   function updateOverride<K extends keyof CarOverrides>(
     carId: string,
     field: K,
@@ -403,6 +407,7 @@ export default function CarCalculator() {
       onUpdateVehicleYear: (year: number) => updateVehicleYear(car.id, year),
       onUpdateInitialMileage: (km: number) => updateInitialMileage(car.id, km),
       onUpdateOtherFees: (amount: number) => updateOtherFees(car.id, amount),
+      onUpdateInsurance: (amount: number) => updateInsurance(car.id, amount),
       onUpdateFuelInput: <K extends keyof FuelInputs>(
         field: K,
         value: number,

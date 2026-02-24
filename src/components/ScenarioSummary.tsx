@@ -32,6 +32,7 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
       props.settings.investmentReturn,
       props.scenario.paymentFrequency,
       props.settings.cashOnHand,
+      props.car.insuranceCostPerYear,
     );
 
   const lifetimeLow = () =>
@@ -47,6 +48,7 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
       props.settings.investmentReturn,
       props.scenario.paymentFrequency,
       props.settings.cashOnHand,
+      props.car.insuranceCostPerYear,
     );
 
   const lifetimeHigh = () =>
@@ -62,6 +64,7 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
       props.settings.investmentReturn,
       props.scenario.paymentFrequency,
       props.settings.cashOnHand,
+      props.car.insuranceCostPerYear,
     );
 
   const showRange = () => props.settings.annualKm > 0;
@@ -248,6 +251,22 @@ export default function ScenarioSummary(props: ScenarioSummaryProps) {
                 {formatCurrency(lifetimeHigh().annualFuelCost)}
               </div>
             )}
+          </div>
+        </div>
+      )}
+      {props.car.insuranceCostPerYear > 0 && (
+        <div class="stats stats-vertical w-full bg-base-200/60 rounded-xl border border-base-300/40 mt-3">
+          <div class="stat py-3 px-4">
+            <div class="stat-title text-xs uppercase tracking-wider opacity-70">
+              Annual Insurance
+            </div>
+            <div class="stat-value text-lg font-normal">
+              {formatCurrency(lifetime().annualInsuranceCost)}
+            </div>
+            <div class="stat-desc">
+              {formatCurrency(lifetime().totalInsuranceCost)} over{" "}
+              {lifetime().effectiveYears.toFixed(1)} years
+            </div>
           </div>
         </div>
       )}

@@ -62,6 +62,7 @@ export function createDefaultCar(label?: string): Car {
     vehicleYear: new Date().getFullYear(),
     initialMileage: 0,
     otherFees: 0,
+    insuranceCostPerYear: 0,
     fuelInputs: createDefaultFuelInputs(),
     overrides: {},
     scenarios: [createDefaultScenario()],

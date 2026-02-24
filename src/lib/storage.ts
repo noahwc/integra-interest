@@ -12,6 +12,9 @@ export function migrateState(state: AppState): void {
     if ((car as Record<string, unknown>).description === undefined) {
       car.description = "";
     }
+    if ((car as Record<string, unknown>).insuranceCostPerYear === undefined) {
+      car.insuranceCostPerYear = 0;
+    }
     for (const scenario of car.scenarios) {
       if ((scenario as Record<string, unknown>).payInFull === undefined) {
         scenario.payInFull = false;
